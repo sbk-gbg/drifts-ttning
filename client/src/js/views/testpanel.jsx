@@ -40,7 +40,8 @@ var TestPanelView = {
    * Triggered when component updates.
    * @instance
    */
-  componentDidUpdate: function () {
+  componentWillUnmount: function () {
+    this.props.model.off('change:text');
   },
 
   /**
