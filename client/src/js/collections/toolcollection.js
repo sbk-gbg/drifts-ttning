@@ -30,7 +30,8 @@ var Tool          = require('tools/tool')
 ,   Draw          = require('tools/draw')
 ,   Edit          = require('tools/edit')
 ,   Anchor        = require('tools/anchor')
-,   Information   = require('tools/information');
+,   Information   = require('tools/information')
+,   Test          = require('tools/test');
 
 /**
  * @description
@@ -73,6 +74,8 @@ var ToolCollection = {
             return new Anchor(args.options);
         case "information":
             return new Information(args.options);
+        case "test":
+            return new Test(args.options);
         default:
             throw "tool not supported " + args.type;
       }

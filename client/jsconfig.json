@@ -46,7 +46,8 @@
         "compiled/exportpanel.js": ["src/js/views/exportpanel.jsx"],
         "compiled/drawpanel.js": ["src/js/views/drawpanel.jsx"],
         "compiled/editpanel.js": ["src/js/views/editpanel.jsx"],
-        "compiled/anchorpanel.js": ["src/js/views/anchorpanel.jsx"]
+        "compiled/anchorpanel.js": ["src/js/views/anchorpanel.jsx"],
+        "compiled/testpanel.js": ["src/js/views/testpanel.jsx"]
       }
     },
     "navigationpanel": {
@@ -84,6 +85,7 @@
         "tools/edit": "./src/js/tools/edit.js",
         "tools/anchor": "./src/js/tools/anchor.js",
         "tools/information": "./src/js/tools/information.js",
+        "tools/test": "./src/js/tools/test.js",
         "layers/layer": "./src/js/layers/layer.js",
         "layers/wmslayer": "./src/js/layers/wmslayer.js",
         "layers/arcgislayer": "./src/js/layers/arcgislayer.js",
@@ -109,6 +111,7 @@
         "views/drawpanel": "./compiled/drawpanel.js",
         "views/editpanel": "./compiled/editpanel.js",
         "views/anchorpanel": "./compiled/anchorpanel.js",
+        "views/testpanel": "./compiled/testpanel.js",
         "views/exportpanel": "./compiled/exportpanel.js",
         "views/panel": "./compiled/panel.js",
         "views/layerpanel": "./compiled/layerpanel.js",

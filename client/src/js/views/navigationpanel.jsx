@@ -29,7 +29,8 @@ var panels = {
   'exportpanel': require('views/exportpanel'),
   'drawpanel': require('views/drawpanel'),
   'editpanel': require('views/editpanel'),
-  'anchorpanel': require('views/anchorpanel')
+  'anchorpanel': require('views/anchorpanel'),
+  'testpanel': require('views/testpanel')
 };
 
 var Alert = require('alert');
