@@ -77,21 +77,18 @@
         ],
         "groups": [
           {
-            "id": "9c8ea66e-9079-293b-17d6-6332ce9abf1f",
+            "id": "2bc647c5-00ef-a0d5-ac1c-ea1c0b86e9ae",
             "parent": "-1",
-            "name": "Data",
-            "toggled": true,
+            "name": "Test",
+            "toggled": false,
+            "expanded": false,
             "layers": [
               {
-                "id": "7",
-                "drawOrder": 3
-              },
-              {
-                "id": "2",
-                "drawOrder": 4
-              },
-              {
                 "id": "3",
+                "drawOrder": 0
+              },
+              {
+                "id": "9",
                 "drawOrder": 2
               },
               {
@@ -105,79 +102,70 @@
       }
     },
     {
+      "type": "coordinates",
+      "options": {
+        "transformations": [
+          {
+            "code": "EPSG:3006",
+            "default": false,
+            "hint": "",
+            "title": "",
+            "xtitle": "",
+            "ytitle": "",
+            "inverseAxis": false
+          }
+        ]
+      }
+    },
+    {
       "type": "infoclick",
       "options": {
-        "markerImg": "assets/icons/dot_marker_blue.png",
+        "displayPopup": 1,
+        "markerImg": "assets/icons/marker.png",
         "anchor": [
-          8,
-          8
-        ],
-        "imgSize": [
           16,
           16
+        ],
+        "imgSize": [
+          32,
+          32
         ]
       }
     },
     {
       "type": "search",
       "options": {
+        "onMap": 0,
+        "toolbar": "bottom",
         "maxZoom": 14,
-        "selectionTools": true,
-        "filterVisible": true,
-        "excelExportUrl": "/mapservice/export/excel",
-        "kmlExportUrl": "/mapservice/export/kml",
-        "markerImg": "http://localhost/hajk/assets/icons/dot_marker_blue.png",
+        "markerImg": "http://localhost/hajk/assets/icons/marker.png",
+        "kmlExportUrl": "/mapservice-beta/export/kml",
+        "excelExportUrl": "/mapservice-beta/export/excel",
+        "displayPopup": 1,
+        "selectionTools": 1,
         "anchor": [
-          8,
-          8
+          16,
+          32
         ],
         "imgSize": [
-          16,
-          16
+          32,
+          32
         ]
       }
     },
     {
-      "type": "coordinates",
+      "type": "information",
       "options": {
-        "transformations": [
-          {
-            "code": "EPSG:3006",
-            "default": true,
-            "hint": "(Standard)",
-            "title": "Sweref 99 TM",
-            "xtitle": "N",
-            "ytitle": "E",
-            "inverseAxis": true
-          },
-          {
-            "code": "EPSG:3007",
-            "title": "Sweref 99 12 00",
-            "xtitle": "N",
-            "ytitle": "E",
-            "inverseAxis": true
-          },
-          {
-            "code": "EPSG:3021",
-            "title": "RT 90 2.5 gon V",
-            "xtitle": "Y",
-            "ytitle": "X",
-            "inverseAxis": false
-          },
-          {
-            "code": "EPSG:4326",
-            "title": "WGS 84",
-            "inverseAxis": false,
-            "xtitle": "Lng",
-            "ytitle": "Lat"
-          }
-        ]
+        "text": "Information om kartan</br>\n<a href=\"http://www.google.se\">Goolge</a>\n</br>\nd sd  </br>\n</br>\n</br>\n sd sdsd</br>\n</br>\n</br>\n</br>\nds s </br>d\n</br>\n</br>\n</br>\n</br>\nsd sd</br>sd sd  </br>\n</br>\n</br>\n</br>\n</br>\n</br>\nsd sd </br>\n</br>\nhej\n</br>\n</br></br>\n</br>\n</br>\n</br></br></br></br></br></br></br></br>\nhej",
+        "headerText": "Information",
+        "visibleAtStart": false
       }
     },
     {
       "type": "export",
       "options": {
-        "url": "http://localhost/mapservice/export/",
+        "exportUrl": "/mapservice/export/pdf",
+        "exportTiffUrl": "/mapservice/export/tiff",
         "scales": [
           250,
           500,
@@ -200,30 +188,8 @@
       }
     },
     {
-      "type": "edit",
-      "options": {}
-    },
-    {
       "type": "anchor",
       "options": {}
-    },
-    {
-      "type": "information",
-      "options": {
-        "visibleAtStart": false
-      }
-    },
-    {
-      "type": "bookmark",
-      "options": {
-        "settingsUrl": "/mapservice/settings/bookmark"
-      }
-    },
-    {
-      "type": "streetview",
-      "options": {
-        "apiKey": "AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4"
-      }
     }
   ],
   "map": {
@@ -233,9 +199,9 @@
       6583005
     ],
     "projection": "EPSG:3006",
-    "zoom": 9,
-    "maxZoom": 9,
-    "minZoom": 3,
+    "zoom": 6,
+    "maxZoom": 3,
+    "minZoom": 9,
     "resolutions": [
       4096.0,
       2048.0,
@@ -257,15 +223,15 @@
       0.0
     ],
     "extent": [
-      150202.07930000033,
-      6382100.4728999995,
-      209944.16160000023,
-      6471028.5090999994
+      150202.0,
+      6382100.0,
+      209944.0,
+      6471028.0
     ],
     "logo": "",
     "colors": {
-      "primaryColor": "#bd6d6d",
-      "secondaryColor": "#f0ecec"
+      "primaryColor": "#619fd2",
+      "secondaryColor": "#ca2323"
     }
   }
 }

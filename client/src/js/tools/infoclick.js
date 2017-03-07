@@ -62,12 +62,12 @@ var InfoClickModelProperties = {
   highlightLayer: undefined,
   markerImg: "assets/icons/marker.png",
   anchor: [
-    8,
-    8
-  ],
-  imgSize: [
     16,
     16
+  ],
+  imgSize: [
+    32,
+    32
   ],
   displayPopup: true
 };
@@ -125,7 +125,7 @@ var InfoClickModel = {
     });
     this.set('map', this.map);
     this.map.addLayer(this.get('highlightLayer').layer);
-    $('#popup-closer').click(() => {      
+    $('#popup-closer').click(() => {
       this.clearHighlight();
     });
   },
@@ -259,14 +259,17 @@ var InfoClickModel = {
 
     const ovl = this.get('map').getOverlayById('popup-0');
 
-    function isPoint (coords) {
+    function isPoint (coord) {
+      if (coord.length === 1) {
+        coord = coord[0];
+      }
       return (
-        coords.length === 1 &&
-        Array.isArray(coords[0]) &&
-        (coords[0].length === 2 ||  coords[0].length === 3) &&
-        typeof coords[0][0] === "number" &&
-        typeof coords[0][1] === "number"
-      );
+        (coord.length === 2 ||  coord.length === 3) &&
+        typeof coord[0] === "number" &&
+        typeof coord[1] === "number"
+      )
+      ? [coord[0], coord[1]]
+      : false;
     }
 
     infos.forEach((info, i) => {
@@ -280,18 +283,26 @@ var InfoClickModel = {
           ,   next      = $('<span class="fa fa-btn fa-arrow-circle-o-right"></span>')
           ,   prev      = $('<span class="fa fa-btn fa-arrow-circle-o-left"></span>')
           ,   title     = $(`<div>${inf.information.caption}</div>`)
-          ,   content   = $(`<div>${inf.information.information.kategori}</div>`)
+          ,   content   = $(`<div></div>`)
           ,   markdown  = ""
           ,   html      = "";
 
+          inf.layer.once('change:visible', () => {
+            ovl.setPosition(undefined);
+            this.clearHighlight();
+          });
+
           if (typeof inf.information.information === "object") {
             markdown = this.objectAsMarkdown(inf.information.information);
+          } else {
+            markdown = inf.information.information;
           }
           html = marked(markdown, { sanitize: false, gfm: true, breaks: true });
+
           content.html(html);
 
-          if (isPoint(coords)) {
-            position = coords[0];
+          if (coords = isPoint(coords)) {
+            position = coords;
           }
 
           caption.prepend(prev);
