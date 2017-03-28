@@ -18,7 +18,7 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
 
 var types = {
   "wms": require('layers/wmslayer'),
@@ -44,7 +44,9 @@ var LayerCollection = {
     var map = this.shell.get('map').getMap()
     ,   olLayer = layer.getLayer();
 
+    layer.set("olMap", map);
     layer.set("shell", this.shell);
+
     if (olLayer) {
       map.addLayer(olLayer);
     }
@@ -90,7 +92,8 @@ var LayerCollection = {
         projection: args.projection,
         origin: args.origin,
         resolutions: args.resolutions,
-        matrixIds: args.matrixIds
+        matrixIds: args.matrixIds,
+        attribution: args.attribution,
       }
     };
     return config;
@@ -131,6 +134,7 @@ var LayerCollection = {
         "singleTile": args.singleTile || false,
         "imageFormat": args.imageFormat || "image/png",
         "serverType": args.serverType || "geoserver",
+        "attribution": args.attribution,
         "legend" : [{
           "Url": getLegendUrl(args),
           "Description" : "Teckenförklaring"
@@ -191,6 +195,11 @@ var LayerCollection = {
         "opacity": args.opacity,
         "serverType": "arcgis",
         "loadType": "ajax",
+        "projection": args.projection,
+        "fillColor": args.fillColor,
+        "lineColor": args.lineColor,
+        "lineStyle": args.lineStyle,
+        "lineWidth": args.lineWidth,
         "url": args.url,
         "queryable": args.queryable,
         "information": args.infobox,
@@ -242,6 +251,7 @@ var LayerCollection = {
         "information": args.infobox,
         "projection": args.projection,
         "opacity": args.opacity,
+        "attribution": args.attribution,
         "params": {
           "LAYERS": 'show:' + args.layers.join(',')
         },

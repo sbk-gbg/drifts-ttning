@@ -18,7 +18,7 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
 
 import React from "react";
 import { Component } from "react";
@@ -151,10 +151,10 @@ class Manager extends Component {
         layerType: "Vector"
       });
 
-      setTimeout(() => {
+      setTimeout(() => {        
         this.refs["VectorLayerForm"].setState({
           id: layer.id,
-          dataFormat: layer.dataFormat || "WFS",       
+          dataFormat: layer.dataFormat || "WFS",
           caption: layer.caption,
           content: layer.content,
           date: layer.date,
@@ -165,6 +165,10 @@ class Manager extends Component {
           visibleAtStart: layer.visibleAtStart,
           queryable: layer.queryable,
           projection: layer.projection,
+          lineWidth: layer.lineWidth || "3",
+          lineStyle: layer.lineStyle || "solid",
+          lineColor: layer.lineColor || "rgba(0, 0, 0, 0.5)",
+          fillColor: layer.fillColor || "rgba(255, 255, 255, 0.5)",
           opacity: layer.opacity,
           symbolXOffset: layer.symbolXOffset,
           symbolYOffset: layer.symbolYOffset,

@@ -18,7 +18,7 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
 
 var Panel = require('views/panel');
 var Alert = require('alert');
@@ -268,6 +268,10 @@ var DrawPanelView = {
     this.props.model.clear();
     this.props.model.set("kmlExportUrl", false);
     this.props.model.set("kmlImport", false);
+    this.props.model.set("circleRadius", "");
+    this.setState({
+      circleRadius: ""
+    });
   },
 
   /**
@@ -301,6 +305,7 @@ var DrawPanelView = {
     })
     this.props.model.set("kmlExportUrl", false);
     this.props.model.set("kmlImport", false);
+    this.props.model.measureTooltip.setPosition(null);
   },
 
   /**

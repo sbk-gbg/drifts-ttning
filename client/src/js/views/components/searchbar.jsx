@@ -18,7 +18,7 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
 
 var SelectionToolbar = require('components/selectiontoolbar');
 var SearchResultGroup = require('components/searchresultgroup');
@@ -362,6 +362,9 @@ var SearchBarView = {
               onKeyDown={this.handleKeyDown}
               onChange={search_on_input} />
           </div>
+        </div>
+        <div className="search-options">
+          {options}
         </div>
         {results}
       </div>

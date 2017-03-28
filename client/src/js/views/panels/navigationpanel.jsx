@@ -18,7 +18,7 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
 
 var panels = {
   'infopanel': require('views/infopanel'),
@@ -30,7 +30,8 @@ var panels = {
   'drawpanel': require('views/drawpanel'),
   'editpanel': require('views/editpanel'),
   'anchorpanel': require('views/anchorpanel'),
-  'streetviewpanel': require('views/streetviewpanel')
+  'streetviewpanel': require('views/streetviewpanel'),
+  'bufferpanel': require('views/bufferpanel')
 };
 
 var Alert = require('alert');
@@ -69,27 +70,23 @@ var NavigationPanelView = {
    * @instance
    */
   componentDidMount: function () {
-    this.props.model.on("change:activePanel", (sender, panel) => {      
+    this.props.model.on("change:activePanel", (sender, panel) => {
       this.setState({
-        'activePanel' : panel,
-        'minimized': false
+        activePanel : panel,
+        minimized: false
       });
     });
 
     this.props.model.on('change:alert', (e, value) => {
-      this.setState({
-        alertVisible: value
-      });
+      this.setState({alertVisible: value});
     });
 
     this.props.model.on("change:visible", (sender, visible) => {
-      this.setState({
-        'toggled': visible
-      });
+      this.setState({toggled: visible});
     });
 
     this.props.model.on("change:toggled", (sender, visible) => {
-      this.setState({ 'minimized': true});
+      this.setState({minimized: true});
     });
 
     this.props.model.on('change:r', () => {
@@ -176,16 +173,20 @@ var NavigationPanelView = {
     var Panel = null;
 
     if (this.state.activePanel) {
-      Panel = panels[this.state.activePanel.type.toLowerCase()];
-      panelInstance = (
-        <Panel
-          model={this.state.activePanel.model}
-          minimized={this.state.minimized}
-          navigationPanel={this}
-          onCloseClicked={() => { this.toggle() }}
-          onUnmountClicked={() => { this.unmount() }}
-        />
-      )
+      if (panels.hasOwnProperty(this.state.activePanel.type.toLowerCase())) {
+        Panel = panels[this.state.activePanel.type.toLowerCase()];
+        panelInstance = (
+          <Panel
+            model={this.state.activePanel.model}
+            minimized={this.state.minimized}
+            navigationPanel={this}
+            onCloseClicked={() => { this.toggle() }}
+            onUnmountClicked={() => { this.unmount() }}
+          />
+        );
+      } else {
+        console.error("Panel reference is not found. See Navigationpanel.jsx.");
+      }
     }
 
     return (

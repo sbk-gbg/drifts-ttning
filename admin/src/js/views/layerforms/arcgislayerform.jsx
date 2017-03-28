@@ -18,7 +18,7 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
 
 import React from "react";
 import { Component } from 'react';
@@ -44,7 +44,8 @@ const defaultState = {
   extent: [],
   opacity: 1,
   queryable: true,
-  addedLayers: []
+  addedLayers: [],
+  attribution: ""
 };
 
 /**
@@ -121,7 +122,8 @@ class ArcGISLayerForm extends Component {
       extent: this.getValue("extent"),
       opacity: this.getValue("opacity"),
       queryable: this.getValue("queryable"),
-      infobox: this.getValue("infobox")
+      infobox: this.getValue("infobox"),
+      attribution: this.getValue("attribution")
     }
   }
 
@@ -503,7 +505,19 @@ class ArcGISLayerForm extends Component {
             onChange={(e) => this.setState({'infobox': e.target.value})}
           />
         </div>
-
+        <div>
+          <label>Upphovsrätt</label>
+          <input
+            type="text"
+            ref="input_attribution"
+            onChange={(e) => {
+              this.setState({attribution: e.target.value});
+              this.validateField("attribution", e);
+            }}
+            value={this.state.attribution}
+            className={this.getValidationClass("attribution")}
+          />
+        </div>
       </fieldset>
     );
   }

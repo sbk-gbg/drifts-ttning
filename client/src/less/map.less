@@ -6,7 +6,24 @@
 }
 
 .ol-attribution.ol-logo-only {
-    top: 4em;
+  bottom: 0;
+}
+
+.ol-attribution {
+  border: 1px solid #ccc;
+  border-bottom: none;
+  background: rgba(255, 255, 255, 0.5) !important;
+  border-radius: 0 !important;
+  padding-bottom: 18px;
+  left: 10px;
+  right: inherit !important;
+}
+
+.ol-attribution.ol-uncollapsible {
+  right: 12px;
+  ul {
+    font-size: 9pt;
+  }
 }
 
 .ol-control button {
@@ -39,6 +56,13 @@
   border-radius: 2px 2px 0 0;
 }
 
+#popup-content {
+  max-height: 250px;
+  margin-right: -9px;
+  margin-top: 7px;
+  overflow: auto;
+}
+
 @media only screen and (max-device-width : 480px) {
   .ol-popup {
     position: fixed;
@@ -46,9 +70,10 @@
     top: 7px;
     left: 7px;
     right: 7px;
-    bottom: 100px;
+    bottom: 300px;
     z-index: 1000;
     #popup-content {
+      max-height: inherit;
       overflow: auto;
       height: 100%;
       img {
@@ -59,36 +84,5 @@
   .ol-popup:before,
   .ol-popup:after {
     border: none;
-  }
-}
-
-.search-bar-holder {
-  position: fixed;
-  width: 400px;
-  right: 69px;
-  top: 9px;
-  z-index: 100;
-  @media only screen and (max-device-width : 480px) {
-    right: 50px;
-    left: 10px;
-    width: auto;
-  }
-  .search-tools {
-    height: 100%;
-    overflow: auto;
-  }
-  .search-results {
-    padding: 10px;
-    border: 1px solid #ccc;
-    background: white;
-    margin-top: -16px;
-    margin-left: 2px;
-    margin-right: 2px;
-    padding-top: 0;
-  }
-  .result-list {
-    max-height: 350px;
-    overflow-y: auto;
-    overflow-x: hidden;
   }
 }

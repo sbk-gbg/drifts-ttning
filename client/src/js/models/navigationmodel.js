@@ -18,7 +18,7 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
 
 /**
  * @typedef {Object} NavigationModel~NavigationModelProperties
@@ -87,10 +87,10 @@ var NavigationModel = {
    * @param {boolean} visible
    */
   onPanelVisibleChanged: function (panel, visible) {
-
+        
     var type = (panel.get('panel') || '').toLowerCase()
     ,   panelRef = _.find(this.get("panels"), panel => (panel.type || '').toLowerCase() === type)
-    ,   activePanel = this.get("activePanel");
+    ,   activePanel = this.get("activePanel", panelRef);
 
     if (visible) {
       if (activePanel) {

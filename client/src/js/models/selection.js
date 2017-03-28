@@ -18,7 +18,7 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
 
 var HighlightLayer = require('layers/highlightlayer');
 
@@ -80,6 +80,7 @@ var SelectionModel = {
     }));
 
     this.set('highlightLayer', new HighlightLayer({
+      id: 'selection-highligt',
       anchor: this.get('anchor'),
       imgSize: this.get('imgSize'),
       markerImg: this.get('markerImg'),
@@ -113,22 +114,42 @@ var SelectionModel = {
     )
   },
 
-  clear: function() {
+  clearSelection: function () {
+    this.get('source').clear();
+    this.get('highlightLayer').clearHighlight();
     this.features = {};
   },
 
-  addFeature: function(f) {
+  clear: function () {
+    this.features = {};
+  },
+
+  putHighlightLayerOnTop: function() {
+    let layers = this.get('olMap').getLayers();
+    const topIndex = layers.getLength() - 1;
+    var h = layers.getArray().find(layer => layer.get("id") === "selection-highligt");
+    if (h) {
+      layers.remove(h);
+      layers.push(h);
+    }
+  },
+
+  addFeature: function (f) {
     const id = f.getId();
 
+    let clone = f.clone();
+    clone.setId(f.getId());
+
     this.get('source').clear();
+    this.putHighlightLayerOnTop();
 
     if (this.features.hasOwnProperty(id)) {
       delete this.features[id];
-      this.get('highlightLayer').removeHighlight(f);
+      this.get('highlightLayer').removeHighlight(clone);
     } else {
       this.features[id] = f;
       f.operation = "Within";
-      this.get('highlightLayer').addHighlight(f, false);
+      this.get('highlightLayer').addHighlight(clone, false);
     }
   },
 
@@ -218,7 +239,7 @@ var SelectionModel = {
     );
   },
 
-  setActiveTool: function(tool) {
+  setActiveTool: function (tool) {
     this.get('olMap').removeInteraction(this.get('drawTool'));
     this.set('activeTool', tool);
 
@@ -238,13 +259,13 @@ var SelectionModel = {
     }
   },
 
-  getFeatures: function() {
+  getFeatures: function () {
     return this.get('highlightLayer').getFeatures().concat(
       this.get('source').getFeatures()
     );
   },
 
-  abort: function() {
+  abort: function () {
     this.setActiveTool('');
     this.get('source').clear();
     this.get('olMap').set('clickLock', false);

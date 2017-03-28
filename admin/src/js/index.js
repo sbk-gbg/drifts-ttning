@@ -18,7 +18,8 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
+
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Backbone from 'backbone';
@@ -26,6 +27,9 @@ import { Router } from 'backbone';
 import ApplicationView from './views/application.jsx';
 import ApplicationModel from './models/application.js';
 import $ from 'jquery';
+import find from 'array.prototype.find';
+
+find.shim();
 
 (function() {
 

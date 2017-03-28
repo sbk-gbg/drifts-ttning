@@ -160,66 +160,107 @@
     {
       "type": "layerswitcher",
       "options": {
-        "baselayers": [],
-        "groups": []
+        "baselayers": [
+          "2"
+        ],
+        "groups": [
+          {
+            "id": "a8e56a2d-78b1-a993-6145-d52436f87a5a",
+            "parent": "-1",
+            "name": "Fastigheter",
+            "toggled": false,
+            "expanded": true,
+            "layers": [
+              {
+                "id": "4",
+                "visibleAtStart": true,
+                "drawOrder": 0
+              }
+            ],
+            "groups": []
+          },
+          {
+            "id": "35aee54d-e23c-806b-bcfd-a386d15e3697",
+            "parent": "-1",
+            "name": "Skolor",
+            "toggled": false,
+            "expanded": false,
+            "layers": [
+              {
+                "id": "3",
+                "visibleAtStart": true,
+                "drawOrder": 0
+              },
+              {
+                "id": "1",
+                "visibleAtStart": true,
+                "drawOrder": 0
+              }
+            ],
+            "groups": []
+          }
+        ],
+        "active": true,
+        "visibleAtStart": true,
+        "backgroundSwitcherBlack": true,
+        "backgroundSwitcherWhite": true,
+        "toggleAllButton": false
       }
     },
     {
-      "type": "edit",
+      "type": "infoclick",
+      "options": {
+        "displayPopup": 1,
+        "markerImg": "assets/icons/shadow_marker.png",
+        "anchor": [
+          7.5,
+          16
+        ],
+        "imgSize": [
+          15,
+          6
+        ]
+      }
+    },
+    {
+      "type": "location",
       "options": {}
+    },
+    {
+      "type": "export",
+      "options": {
+        "exportUrl": "/mapservice/export/pdf",
+        "exportTiffUrl": "/mapservice/export/tiff",
+        "pdfActive": true,
+        "tiffActive": false,
+        "scales": [
+          250,
+          500,
+          1000,
+          2500,
+          5000,
+          10000,
+          25000,
+          50000,
+          100000,
+          250000
+        ]
+      }
     },
     {
       "type": "coordinates",
       "options": {
-        "transformations": [
-          {
-            "code": "EPSG:3006",
-            "default": true,
-            "hint": "",
-            "title": "Sweref 99 TM",
-            "xtitle": "E",
-            "ytitle": "N",
-            "inverseAxis": false
-          }
-        ]
-      }
-    },
-    {
-      "type": "draw",
-      "options": {
-        "exportUrl": "/mapservice/export/kml",
-        "importUrl": "/mapservice/import/kml"
-      }
-    },
-    {
-      "type": "search",
-      "options": {
-        "onMap": 0,
-        "toolbar": "bottom",
-        "maxZoom": 14,
-        "markerImg": "http://localhost/hajk/assets/icons/marker.png",
-        "kmlExportUrl": "/mapservice/export/kml",
-        "excelExportUrl": "/mapservice/export/excel",
-        "displayPopup": true,
-        "selectionTools": true,
-        "anchor": [
-          16,
-          32
-        ],
-        "imgSize": [
-          32,
-          32
-        ]
+        "transformations": []
       }
     }
   ],
   "map": {
     "target": "map",
     "center": [
-      414962,
-      6583005
+      178826,
+      6422667
     ],
-    "projection": "EPSG:3006",
+    "projection": "EPSG:3007",
     "zoom": 3,
     "maxZoom": 3,
     "minZoom": 9,
@@ -251,7 +292,7 @@
     ],
     "logo": "",
     "colors": {
-      "primaryColor": "#039f30",
+      "primaryColor": "#1B78CC",
       "secondaryColor": "#FFF"
     }
   }

@@ -2,10 +2,12 @@ module.exports = function(grunt) {
 
   grunt.initConfig({
 
-    pkg: grunt.file.readJSON('package.json'),    
+    pkg: grunt.file.readJSON('package.json'),
+
+    licence_text: grunt.file.read('licence_header.txt'),
 
     browserify: {
-      dist: {
+      debug: {
         options: {
           transform: [
             ['babelify', {presets: ['es2015', 'react']}]
@@ -16,6 +18,29 @@ module.exports = function(grunt) {
         },
         src: ['src/**/*.js', 'src/**/*.jsx'],
         dest: 'dist/js/<%= pkg.name %>.js',
+      },
+      dist: {
+        options: {
+          transform: [
+            ['babelify', {presets: ['es2015', 'react']}],
+          ],
+          browserifyOptions: {
+            debug: false
+          }
+        },
+        src: ['src/**/*.js', 'src/**/*.jsx'],
+        dest: 'dist/js/<%= pkg.name %>.min.js',
+      }
+    },
+
+    uglify: {
+      options: {
+        mangle: true
+      },
+      target: {
+        files: {
+          'dist/js/<%= pkg.name %>.min.js': ['dist/js/<%= pkg.name %>.min.js']
+        }
       }
     },
 
@@ -25,6 +50,29 @@ module.exports = function(grunt) {
         },
         files: {
           'dist/css/hajk-admin.css': 'src/less/*.less'
+        }
+      }
+    },
+
+    env: {
+        prod: {
+            NODE_ENV: 'production'
+        }
+    },
+
+    usebanner: {
+      taskName: {
+        options: {
+          position: 'top',
+          banner: '<%= licence_text %>',
+          linebreak: true
+        },
+        files: {
+          src: [
+            //'src/**/*.js',
+            //'src/**/*.jsx'
+            'dist/js/<%= pkg.name %>.min.js'
+          ]
         }
       }
     },
@@ -39,6 +87,10 @@ module.exports = function(grunt) {
           {
             src: "src/static/index.html",
             dest: "dist/index.html"
+          },
+          {
+            src: "src/static/debug.html",
+            dest: "dist/debug.html"
           },
           {
             cwd: "src/static/fonts",
@@ -59,7 +111,14 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-less');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-browserify');
+  grunt.loadNpmTasks('grunt-replace');
+  grunt.loadNpmTasks('grunt-usebanner');
+  grunt.loadNpmTasks('grunt-env');
 
-  grunt.registerTask('build', ['copy', 'less:production', 'browserify']);
+  grunt.registerTask('default', ['debug', 'release']);
+  grunt.registerTask('debug', ['copy', 'less:production', 'browserify:debug']);
+  grunt.registerTask('release', ['copy', 'less:production', 'env', 'browserify:dist', 'uglify', 'licence']);
+  grunt.registerTask('licence', ['usebanner']);
 };

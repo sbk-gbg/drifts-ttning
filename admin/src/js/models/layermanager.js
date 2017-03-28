@@ -18,11 +18,11 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
 
 import X2JS from 'x2js';
 import { Model } from 'backbone';
-import ol from 'openlayers';
+import { format } from 'openlayers';
 import $ from 'jquery';
 
 var manager = Model.extend({
@@ -305,7 +305,7 @@ var manager = Model.extend({
         request: 'GetCapabilities'
       },
       success: data => {
-        var response = (new ol.format.WMSCapabilities()).read(data);
+        var response = (new format.WMSCapabilities()).read(data);
         callback(response);
       },
       error: data => {

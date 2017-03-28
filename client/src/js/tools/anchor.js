@@ -18,7 +18,7 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
 
 var ToolModel = require('tools/tool');
 
@@ -38,7 +38,7 @@ var AnchorModelProperties = {
   panel: 'anchorpanel',
   toolbar: 'bottom',
   icon: 'fa fa-link icon fa-flip-horizontal',
-  title: 'Länk',
+  title: 'Länk till kartan',
   visible: false,
   shell: undefined,
   anchor: ""

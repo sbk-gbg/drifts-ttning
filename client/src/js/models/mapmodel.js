@@ -18,7 +18,7 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
 
 var Drag = require("models/drag");
 
@@ -63,7 +63,10 @@ var MapModel = {
       interactions: ol.interaction.defaults().extend([new Drag()]),
       target: this.get("target"),
       layers: [],
-      controls: [new ol.control.Zoom({zoomInTipLabel: 'Zooma in', zoomOutTipLabel: 'Zooma ut'})],
+      controls: [
+        new ol.control.Zoom({ zoomInTipLabel: 'Zooma in', zoomOutTipLabel: 'Zooma ut' }),
+        new ol.control.Attribution({ collapsible: false })
+      ],
       overlays: [],
       view: new ol.View({
         zoom: this.get("zoom"),
@@ -104,7 +107,7 @@ var MapModel = {
     return overlay;
   },
 
-  update: function(config) {    
+  update: function(config) {
     var map = this.get('ol');
     map.getView().setCenter(config.center);
     map.getView().setZoom(config.zoom);

@@ -18,9 +18,10 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
 
 var Panel = require('views/panel');
+
 /**
  * @class
  */
@@ -42,9 +43,9 @@ var SelectionPanelView = {
    */
   componentWillMount: function () {
     this.props.model.on('change:activeTool', () => {
-        this.setState({
-          activeTool: this.props.model.get('activeTool')
-        });
+      this.setState({
+        activeTool: this.props.model.get('activeTool')
+      });
     });
   },
 

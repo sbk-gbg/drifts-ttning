@@ -18,7 +18,7 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
 
 var ToolModel = require('tools/tool');
 
@@ -33,6 +33,11 @@ var ToolModel = require('tools/tool');
  * @property {boolean} visible - Default: false
  * @property {LayerCollection} layerCollection - Default: undefined
  * @property {boolean} backgroundSwitcherMode - Default: hidden
+ * @property {boolean} active - Default: false
+ * @property {boolean} visibleAtStart - Default: true
+ * @property {boolean} backgroundSwitcherBlack - Default: true
+ * @property {boolean} backgroundSwitcherWhite - Default: true
+ * @property {boolean} toggleAllButton - Default: false
  */
 var LayerSwitcherModelProperties = {
   type: 'layerswitcher',
@@ -46,7 +51,8 @@ var LayerSwitcherModelProperties = {
   active: true,
   visibleAtStart: true,
   backgroundSwitcherBlack: true,
-  backgroundSwitcherWhite: true
+  backgroundSwitcherWhite: true,
+  toggleAllButton: true
 };
 
 /**
@@ -90,6 +96,16 @@ var LayerSwitcherModel = {
   },
 
   /**
+   * Set visibility for all layers to false.
+   * @instance
+   */
+   toggleAllOff() {
+     this.get('layerCollection').forEach(layer => {
+       layer.setVisible(false);
+     });
+   },
+
+  /**
    * Export the map as a PDF-file
    * @instance
    * @return {Layer[]} base layers
@@ -117,7 +133,7 @@ var LayerSwitcherModel = {
    * @instance
    */
   clicked: function (arg) {
-    this.set('visible', true);
+    this.set('visible', true);    
   }
 };
 

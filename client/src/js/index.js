@@ -18,7 +18,7 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
 
 /**
  * Singleton (static) object for the main application.
@@ -99,7 +99,7 @@
         var mapLayer = group.layers.find(l => l.id === layer.id)
 
         if (mapLayer) {
-          layer.drawOrder = mapLayer.drawOrder;          
+          layer.drawOrder = mapLayer.drawOrder;
           if (layer.visibleAtStart !== undefined) {
             layer.visibleAtStart = mapLayer.visibleAtStart;
           }

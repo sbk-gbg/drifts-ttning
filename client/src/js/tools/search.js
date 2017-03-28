@@ -18,7 +18,7 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
 
 var ToolModel = require('tools/tool');
 var SelectionModel = require('models/selection');
@@ -169,9 +169,15 @@ var SearchModel = {
 
       return features.reduce((str, feature) => {
 
-        var coords = feature.getGeometry().getCoordinates();
-        var posList = "";
-        var operation = "Intersects";
+        var posList = ""
+        ,   operation = "Intersects"
+        ,   coords = [];
+
+        if (feature.getGeometry() instanceof ol.geom.Circle) {
+          coords = ol.geom.Polygon.fromCircle(feature.getGeometry(), 96).getCoordinates();
+        } else {
+          coords = feature.getGeometry().getCoordinates();
+        }
 
         if (this.isCoordinate(coords[0])) {
           posList = coords.map(c => c[0] + " " + c[1]).join(" ");
@@ -435,9 +441,11 @@ var SearchModel = {
     ,   size   = map.getSize()
     ,   ovl    = map.getOverlayById('popup-0');
 
-    this.set('hits', [spec.hit]);
-
-    map.getView().fit(extent, size, { maxZoom: this.get('maxZoom') });
+    this.set('hits', [spec.hit]);    
+    map.getView().fit(extent, {
+      size: size,
+      maxZoom: this.get('maxZoom')
+    });
 
     this.featureLayer.getSource().clear();
     this.featureLayer.getSource().addFeature(spec.hit);
@@ -588,7 +596,7 @@ var SearchModel = {
         ,   names = Object.keys(attributes);
 
         names = names.filter(name => {
-          if (!hit) {
+          if (!hit.infobox) {
             return typeof attributes[name] === "string"  ||
                    typeof attributes[name] === "boolean" ||
                    typeof attributes[name] === "number";
@@ -600,9 +608,17 @@ var SearchModel = {
           }
         });
 
-        columns = names;
-        return names.map(name => attributes[name]);
+        if (names.length > columns.length) {
+          columns = names;
+        }
+        return columns.map(name => attributes[name] || null);
       });
+
+      var e = {
+        TabName: group,
+        Cols: columns,
+        Rows: values
+      };
 
       return {
         TabName: group,

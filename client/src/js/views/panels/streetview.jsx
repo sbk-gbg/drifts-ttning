@@ -18,7 +18,8 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
+
 var Panel = require('views/panel');
 /**
  * @class
@@ -31,6 +32,7 @@ var StreetView = {
    */
   getInitialState: function() {
     return {
+      imageDate: ""
     };
   },
 
@@ -48,11 +50,17 @@ var StreetView = {
   componentDidMount: function () {
     $('.ol-viewport').css('cursor', 'crosshair');
     this.props.model.activate();
+    this.props.model.on('change:imageDate', () => {
+      this.setState({
+        imageDate: this.props.model.get('imageDate')
+      });
+    });
   },
 
   componentWillUnmount: function () {
     $('.ol-viewport').css('cursor', 'default');
     this.props.model.deactivate();
+    this.props.model.off('change:imageDate');
   },
 
   /**
@@ -68,6 +76,7 @@ var StreetView = {
           <h3>Street view</h3>
           <div>Klicka i kartan för att aktivera street view.</div>
           <div id="street-view-window"></div>
+          <div id="image-date">{this.state.imageDate ? "Bild tagen: " + this.state.imageDate : ""}</div>
         </div>
       </Panel>
     );

@@ -18,7 +18,7 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
 
 var ToolModel = require('tools/tool');
 var HighlightLayer = require('layers/highlightlayer');
@@ -156,7 +156,7 @@ var InfoClickModel = {
     });
 
     this.map.forEachFeatureAtPixel(event.pixel, (feature, layer) => {
-      if (layer && layer.get('name')) {
+      if (layer && layer.get('name') && (layer.get('queryable') !== false)) {
         if (
           layer.get('name') !== 'preview-layer' &&
           layer.get('name') !== 'highlight-wms'
@@ -312,10 +312,10 @@ var InfoClickModel = {
           }
 
           infobox.append(title, content);
-
-          $('#popup-content').html(infobox);
+          $('#popup-content').show().html(infobox).scrollTop(0);
           ovl.setPosition(position);
-
+          $(ovl.getElement()).hide().fadeIn(0);
+          
           Object.keys(inf).forEach(key => {
             feature.set(key, inf[key]);
           });

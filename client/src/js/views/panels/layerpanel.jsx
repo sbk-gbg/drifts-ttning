@@ -18,7 +18,7 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
 
 var Panel = require('views/panel');
 var LayerItem = require('views/layeritem');
@@ -317,6 +317,15 @@ var LayerPanelView = {
   },
 
   /**
+   * Toggle all layers
+   * @instance
+   */
+   toggleAllOff() {
+     this.props.model.toggleAllOff();
+   },
+
+
+  /**
    * Change layer-list configuration.
    * @deprecated
    * @instance
@@ -376,6 +385,8 @@ var LayerPanelView = {
    */
   render: function () {
 
+    var groups, toggleAllButton;
+
     this.groups = this.props.model.get('groups');
 
     groups = this.renderGroups(this.props.model.get('groups'));
@@ -384,9 +395,18 @@ var LayerPanelView = {
       this.updateGroupToggledCheckbox(layer);
     });
 
+    if (this.props.model.get('toggleAllButton')) {
+      toggleAllButton = (
+        <div style={{marginBottom: "10px"}}>
+          <button className="btn btn-default btn-inverse" onClick={() => this.toggleAllOff()}>Släck alla lager</button>
+        </div>
+      );
+    }
+
     return (
       <Panel title="Lagerhanterare" onCloseClicked={this.props.onCloseClicked} onUnmountClicked={this.props.onUnmountClicked} minimized={this.props.minimized}>
         <div className="layer-panel">
+          {toggleAllButton}
           <BackgroundSwitcher layers={this.props.model.getBaseLayers()} model={this.props.model}></BackgroundSwitcher>
           {groups}
         </div>

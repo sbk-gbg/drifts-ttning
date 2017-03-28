@@ -1,10 +1,32 @@
+// Copyright (C) 2016 Göteborgs Stad
+//
+// Denna programvara är fri mjukvara: den är tillåten att distribuera och modifiera
+// under villkoren för licensen CC-BY-NC-SA 4.0.
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the CC-BY-NC-SA 4.0 licence.
+//
+// http://creativecommons.org/licenses/by-nc-sa/4.0/
+//
+// Det är fritt att dela och anpassa programvaran för valfritt syfte
+// med förbehåll att följande villkor följs:
+// * Copyright till upphovsmannen inte modifieras.
+// * Programvaran används i icke-kommersiellt syfte.
+// * Licenstypen inte modifieras.
+//
+// Den här programvaran är öppen i syfte att den skall vara till nytta för andra
+// men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
+// SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
+//
+// https://github.com/hajkmap/Hajk
+
 import React from "react";
 import { Component } from "react";
 
 var defaultState = {
   validationErrors: [],
   active: false,
-  apiKey: "AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4",  
+  apiKey: "AIzaSyCb-bvLmybNb4QSERR43eGlvvQyUrBAQG4",
 };
 
 class ToolOptions extends Component {
@@ -41,10 +63,13 @@ class ToolOptions extends Component {
 
   handleInputChange(event) {
     const target = event.target;
-    const value = target.type === 'checkbox' ? target.checked : target.value;
     const name = target.name;
+    var value = target.type === 'checkbox' ? target.checked : target.value;
+    if (typeof value === "string" && value.trim() !== "") {
+      value = !isNaN(Number(value)) ? Number(value) : value
+    }
     this.setState({
-      [name]: !isNaN(Number(value)) ? Number(value) : value
+      [name]: value
     });
   }
 
