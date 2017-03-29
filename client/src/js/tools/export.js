@@ -18,9 +18,10 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
 
 var ToolModel = require('tools/tool');
+var transform = require('models/transform');
 
 String.prototype.toHex = function() {
   if (/^#/.test(this)) return this;
@@ -52,6 +53,7 @@ String.prototype.toOpacity = function() {
  * @property {string} toolbar - Default: bottom
  * @property {string} icon - Default: fa fa-print icon
  * @property {string} exportUrl - Default: /mapservice/export/pdf
+ * @property {string} exportTiffUrl - Default: /mapservice/export/tiff
  * @property {string} copyright - Default: © Lantmäteriverket i2009/00858
  */
 var ExportModelProperties = {
@@ -61,7 +63,11 @@ var ExportModelProperties = {
   toolbar: 'bottom',
   icon: 'fa fa-print icon',
   exportUrl: '/mapservice/export/pdf',
+  exportTiffUrl: '/mapservice/export/tiff',
+  pdfActive: true,
+  tiffActive: true,
   copyright: "© Lantmäteriverket i2009/00858",
+  activeTool: '',
   scales: [1000, 2000, 5000, 10000, 20000, 50000, 100000, 250000]
 };
 
@@ -79,8 +85,25 @@ var ExportModel = {
   defaults: ExportModelProperties,
 
   configure: function (shell) {
+
+    const formats = [];
+
+    if (this.get('pdfActive')) {
+      formats.push('pdf');
+    }
+    if (this.get('tiffActive')) {
+      formats.push('tiff');
+    }
+    if (formats.length > 0) {
+      this.setActiveTool(formats[0]);
+    }
+
     this.set('olMap', shell.getMap().getMap());
     this.addPreviewLayer();
+  },
+
+  setActiveTool: function (tool) {
+    this.set('activeTool', tool);
   },
 
   /**
@@ -113,6 +136,14 @@ var ExportModel = {
     this.previewLayer.getSource().clear();
   },
 
+  removeTiffPreview: function() {
+    this.get('transform').clear();
+    this.get('olMap').removeInteraction(this.get('transform'));
+    this.previewLayer.getSource().clear();
+    this.set('previewFeature', undefined);
+    this.get('olMap').set('clickLock', false);
+  },
+
   /**
    * Get the preview feature.
    * @instance
@@ -120,6 +151,46 @@ var ExportModel = {
    */
   getPreviewFeature: function () {
     return this.get('previewFeature')
+  },
+
+  addTiffPreview: function (center) {
+    var dpi = 25.4 / 0.28
+    ,   ipu = 39.37
+    ,   sf  = 1
+    ,   w   = (210 / dpi / ipu * 10000 / 2) * sf
+    ,   y   = (297 / dpi  / ipu * 10000 / 2) * sf
+    ,   coords = [
+          [
+            [center[0] - w, center[1] - y],
+            [center[0] - w, center[1] + y],
+            [center[0] + w, center[1] + y],
+            [center[0] + w, center[1] - y],
+            [center[0] - w, center[1] - y]
+          ]
+        ]
+    ,   feature = new ol.Feature({
+        geometry: new ol.geom.Polygon(coords)
+      })
+    ;
+
+    this.removePreview();
+    this.set('previewFeature', feature);
+    this.previewLayer.getSource().addFeature(feature);
+
+    var features = new ol.Collection();
+    features.push(feature);
+
+    this.set('transform', new ol.interaction.Transform({
+      translateFeature: true,
+      scale: true,
+      rotate: false,
+      keepAspectRatio: false,
+      translate: true,
+      stretch: false,
+      features: features
+    }));
+    this.get('olMap').addInteraction(this.get('transform'));
+    this.get('olMap').set('clickLock', true);
   },
 
   /**
@@ -243,12 +314,6 @@ var ExportModel = {
       .getArray()
       .filter(exportable)
       .map((layer, i) => {
-        // layerUrl = '';
-        // if (typeof layer.getSource().getUrls == 'function')
-        //   layerUrl = formatUrl(layer.getSource().getUrls()[0]);
-        // else if (typeof layer.getSource().getUrl == 'function')
-        //   layerUrl = formatUrl(layer.getSource().getUrl());
-
         return {
           url: layer.getSource().get('url'),
           layers: layer.getSource().getParams()["LAYERS"].split(','),
@@ -266,9 +331,9 @@ var ExportModel = {
    */
   findVector: function () {
 
-    var drawLayer = this.get('olMap').getLayers().getArray().find(layer => layer.get('name') === 'draw-layer');
-
     function asObject(style) {
+
+      if (!style) return null;
 
       if (Array.isArray(style)) {
         if (style.length === 2) {
@@ -280,27 +345,27 @@ var ExportModel = {
       }
 
       var fillColor = "#FC345C"
-      ,   fillOpacity =  0.5
+      ,   fillOpacity = 0.5
       ,   strokeColor = "#FC345C"
       ,   strokeOpacity = 1
       ,   strokeWidth = 3
       ,   strokeLinecap = "round"
-      ,   strokeDashstyle =  "solid"
-      ,   pointRadius =  10
+      ,   strokeDashstyle = "solid"
+      ,   pointRadius = 10
       ,   pointFillColor = "#FC345C"
       ,   pointSrc = ""
-      ,   labelAlign =  "cm"
+      ,   labelAlign = "cm"
       ,   labelOutlineColor = "white"
       ,   labelOutlineWidth = 3
-      ,   fontSize =  "16"
-      ,   fontColor =  "#FFFFFF";
+      ,   fontSize = "16"
+      ,   fontColor = "#FFFFFF";
 
-      if (style.getFill()) {
+      if (style.getFill && style.getFill()) {
         fillColor = style.getFill().getColor().toHex();
         fillOpacity = style.getFill().getColor().toOpacity();
       }
 
-      if (style.getStroke()) {
+      if (style.getFill && style.getStroke()) {
 
         strokeColor = style.getStroke().getColor().toHex();
         strokeWidth = style.getStroke().getWidth() || 3;
@@ -310,7 +375,7 @@ var ExportModel = {
                           "dash" : "dot": "solid";
       }
 
-      if (style.getImage()) {
+      if (style.getImage && style.getImage()) {
         if (style.getImage() instanceof ol.style.Icon) {
           pointSrc = style.getImage().getSrc();
         }
@@ -345,6 +410,7 @@ var ExportModel = {
         .toString()
         .split(',')
         .map(i => parseFloat(i))
+        .filter(i => i > 2500)
         .reduce((r, n, i, a) => {
           if (i % 2 !== 0) {
             r.push([a[i - 1], a[i]]);
@@ -354,11 +420,11 @@ var ExportModel = {
       );
     }
 
-    function generate(features) {
+    function translateVector(features, sourceStyle) {
 
       function getText(feature) {
-        if (feature.getProperties()) {
-          if (feature.getProperties().type == "Text") {
+        if (feature.getProperties() &&
+            feature.getProperties().type === "Text") {
             if (feature.getProperties().description)
               text = feature.getProperties().description
             else if (feature.getProperties().name)
@@ -366,33 +432,69 @@ var ExportModel = {
             else
               text = ''
             return text
-          }
         }
-        if (feature.getStyle()[1] &&
+        if (feature.getStyle &&
+            Array.isArray(feature.getStyle()) &&
+            feature.getStyle()[1] &&
             feature.getStyle()[1].getText() &&
             feature.getStyle()[1].getText().getText()) {
           return feature.getStyle()[1].getText().getText();
         }
       }
 
+      return {
+        features: features.map(feature => {
 
+          var type = feature.getGeometry().getType();
 
-      return [{
-        features: features.map((feature) => {
+          if (!feature.getStyle() && sourceStyle) {
+            feature.setStyle(sourceStyle)
+          }
+
           return {
-            type: feature.getProperties().type,
+            type: type,
             attributes: {
               text: getText(feature),
               style: asObject(feature.getStyle())
             },
-            coordinates: as2DPairs(feature.getGeometry().getCoordinates())
+            coordinates: type === "Circle"
+              ? as2DPairs(feature.getGeometry().getCenter()).concat([[feature.getGeometry().getRadius(), 0]])
+              : as2DPairs(feature.getGeometry().getCoordinates())
           }
         })
-      }]
+      }
     }
 
-    f = generate(drawLayer.getSource().getFeatures());
-    return f
+    var layers
+    ,   vectorLayers
+    ,   imageVectorLayers
+    ,   extent = this.previewLayer.getSource().getFeatures()[0].getGeometry().getExtent()
+    ;
+
+    layers = this.get('olMap').getLayers().getArray();
+
+    vectorLayers = layers.filter(layer =>
+      layer instanceof ol.layer.Vector &&
+      layer.getVisible() &&
+      layer.get('name') !== 'preview-layer' &&
+      layer.get('name') !== 'search-selection-layer'
+    );
+
+    imageVectorLayers = layers.filter(layer =>
+      layer instanceof ol.layer.Image &&
+      layer.getSource() instanceof ol.source.ImageVector &&
+      layer.getVisible()
+    );
+
+    vectorLayers = vectorLayers.map(layer =>
+      translateVector(layer.getSource().getFeaturesInExtent(extent))
+    ).filter(layer => layer.features.length > 0);
+
+    imageVectorLayers = imageVectorLayers.map(layer =>
+      translateVector(layer.getSource().getSource().getFeaturesInExtent(extent), layer.getSource().getStyle()()[0])
+    ).filter(layer => layer.features.length > 0);
+
+    return vectorLayers.concat(imageVectorLayers);
   },
 
   /**
@@ -517,6 +619,8 @@ var ExportModel = {
     }, {});
   },
 
+  exportHitsFormId: 13245,
+
   /**
    * Export the map as a PDF-file
    * @instance
@@ -524,6 +628,7 @@ var ExportModel = {
    * @param {function} callback
    */
   exportPDF: function(options, callback) {
+
     var extent = this.previewLayer.getSource().getFeatures()[0].getGeometry().getExtent()
     ,   left   = extent[0]
     ,   right  = extent[2]
@@ -531,6 +636,9 @@ var ExportModel = {
     ,   top    = extent[3]
     ,   scale  = options.scale
     ,   dpi    = options.resolution
+    ,   form   = document.createElement('form')
+    ,   input  = document.createElement('input')
+    ,   curr   = document.getElementById(this.exportHitsFormId)
     ,   data   = {
       wmsLayers: [],
       vectorLayers: [],
@@ -557,18 +665,80 @@ var ExportModel = {
     data.format = options.format;
     data.scale = options.scale;
 
-    $.ajax({
-      type: "post",
-      url: this.get("exportUrl"),
-      data: JSON.stringify(data),
-      contentType: "application/json",
-      success: rsp => {
-        callback(rsp);
-      },
-      error: rsp => {
-        callback(rsp);
-      }
-    });
+    form.id = this.exportHitsFormId;
+    form.method = "post";
+    form.action = this.get('exportUrl');
+    input.value = JSON.stringify(data);
+    input.name  = "json";
+    input.type  = "hidden";
+    form.appendChild(input);
+
+    if (curr)
+      document.body.replaceChild(form, curr);
+    else
+      document.body.appendChild(form);
+
+    form.submit();
+
+    callback();
+  },
+
+  resolutionToScale: function(dpi, resolution) {
+    var inchesPerMeter = 39.37;
+    return resolution * dpi * inchesPerMeter;
+  },
+
+  exportTIFF: function() {
+    var extent = this.previewLayer.getSource().getFeatures()[0].getGeometry().getExtent()
+    ,   left   = extent[0]
+    ,   right  = extent[2]
+    ,   bottom = extent[1]
+    ,   top    = extent[3]
+    ,   dpi    = (25.4 / 0.28)
+    ,   scale  = this.resolutionToScale(dpi, this.get('olMap').getView().getResolution())
+    ,   form   = document.createElement('form')
+    ,   input  = document.createElement('input')
+    ,   curr   = document.getElementById(this.exportHitsFormId)
+    ,   data   = {
+      wmsLayers: [],
+      vectorLayers: [],
+      size: null,
+      bbox: null
+    };
+
+    data.vectorLayers = this.findVector() || [];
+    data.wmsLayers = this.findWMS() || [];
+    data.wmtsLayers = this.findWMTS() || [];
+    data.arcgisLayers = this.findArcGIS() || [];
+
+    dx = Math.abs(left - right);
+    dy = Math.abs(bottom - top);
+
+    data.size = [
+      parseInt(49.65 * (dx / scale) * dpi),
+      parseInt(49.65 * (dy / scale) * dpi)
+    ];
+
+    data.resolution = 96;
+    data.bbox = [left, right, bottom, top];
+    data.orientation = "";
+    data.format = "";
+    data.scale = scale;
+
+    form.id = this.exportHitsFormId;
+    form.method = "post";
+    form.action = this.get('exportTiffUrl');
+    input.value = JSON.stringify(data);
+    input.name  = "json";
+    input.type  = "hidden";
+    form.appendChild(input);
+
+    if (curr)
+      document.body.replaceChild(form, curr);
+    else
+      document.body.appendChild(form);
+
+    form.submit();
   },
 
   /**
@@ -584,6 +754,7 @@ var ExportModel = {
    */
   clicked: function () {
     this.set('visible', true);
+    this.set('toggled', !this.get('toggled'));
   }
 
 };

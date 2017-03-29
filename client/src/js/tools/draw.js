@@ -18,7 +18,7 @@
 // men UTAN NÅGRA GARANTIER; även utan underförstådd garanti för
 // SÄLJBARHET eller LÄMPLIGHET FÖR ETT VISST SYFTE.
 //
-// https://github.com/Johkar/Hajk2
+// https://github.com/hajkmap/Hajk
 
 var ToolModel = require('tools/tool');
 var source;
@@ -78,7 +78,7 @@ var DrawModelProperties = {
   pointColor: "rgb(15, 175, 255)",
   pointRadius: 7,
   pointSymbol: false,
-  markerImg: "http://localhost/gbg/assets/icons/marker.png",
+  markerImg: "http://localhost/hajk/assets/icons/marker.png",
   lineColor: "rgb(15, 175, 255)",
   lineWidth: 3,
   lineStyle: "solid",
@@ -122,6 +122,24 @@ var DrawModel = {
    */
   defaults: DrawModelProperties,
 
+  /**
+   * @instance
+   * @property {object} measureTooltipElement
+   */
+  measureTooltipElement: undefined,
+
+  /**
+   * @instance
+   * @property {object} measureTooltip
+   */
+  measureTooltip: undefined,
+
+  /**
+   * @instance
+   * @property {number} exportHitsFormId
+   */
+  exportHitsFormId: 12345,
+
   initialize: function (options) {
     ToolModel.prototype.initialize.call(this);
   },
@@ -141,6 +159,7 @@ var DrawModel = {
     this.set('olMap', olMap);
     this.get('olMap').addLayer(this.get('drawLayer'));
     this.set('drawLayer', this.get('drawLayer'));
+    this.createMeasureTooltip();
   },
 
   /**
@@ -185,15 +204,131 @@ var DrawModel = {
    */
   handleDrawEnd: function (feature, type) {
     if (type === "Text") {
-
       feature.setStyle(this.get('scetchStyle'));
       this.set('dialog', true);
       this.set('drawFeature', feature);
-
     } else {
       this.setFeaturePropertiesFromGeometry(feature);
       feature.setStyle(this.getStyle(feature));
     }
+    this.measureTooltip.setPosition(undefined);
+  },
+
+  /**
+   * Event handler to excecute when the users starts to draw.
+   * @param {extern:"ol.geom.GeometryType"} type
+   * @instance
+   */
+  handleDrawStart: function(e, geometryType) {
+
+    var circleRadius = parseFloat(this.get('circleRadius'));
+
+    if (!isNaN(circleRadius) && geometryType === "Circle") {
+      this.get("drawTool").finishDrawing();
+      let f = new ol.Feature({
+        geometry: new ol.geom.Circle(e.feature.getGeometry().getCenter(), circleRadius)
+      });
+      this.get('source').removeFeature(e.feature);
+      this.get('source').addFeature(f);
+      this.handleDrawEnd(f);
+    }
+
+    e.feature.getGeometry().on('change', e => {
+
+      var toolTip = ""
+      ,   coord = undefined;
+
+      if (this.get("drawToolActive")) {
+        if (e.target instanceof ol.geom.LineString) {
+          toolTip = this.formatLabel("length", e.target.getLength());
+          coord = e.target.getLastCoordinate()
+        }
+
+        if (e.target instanceof ol.geom.Polygon) {
+          toolTip = this.formatLabel("area", e.target.getArea());
+          coord = this.get('pointerPosition').coordinate;
+        }
+
+        if (e.target instanceof ol.geom.Circle) {
+          toolTip = this.formatLabel("length", e.target.getRadius());
+          coord = this.get('pointerPosition').coordinate;
+        }
+
+        this.measureTooltipElement.innerHTML = toolTip;
+        if (this.get('showLabels')) {
+          this.measureTooltip.setPosition(coord);
+        }
+      }
+    });
+
+  },
+
+  /**
+   * Create draw interaction and add to map.
+   * @param {extern:"ol.geom.GeometryType"} type
+   * @instance
+   */
+  createMeasureTooltip: function() {
+    if (this.measureTooltipElement) {
+      this.measureTooltipElement.parentNode.removeChild(measureTooltipElement);
+    }
+    this.measureTooltipElement = document.createElement('div');
+    this.measureTooltipElement.className = 'tooltip-draw tooltip-measure';
+    this.measureTooltip = new ol.Overlay({
+      element: this.measureTooltipElement,
+      offset: [0, -15],
+      positioning: 'bottom-center'
+    });
+    this.get('olMap').addOverlay(this.measureTooltip);
+  },
+
+  /**
+   * Create draw interaction and add to map.
+   * @param {extern:"ol.geom.GeometryType"} type
+   * @instance
+   */
+  formatLabel: function(type, value) {
+
+    if (type === "point") {
+      label ="Nord: " + value[0] + " Öst: " + value[1];
+    }
+
+    if (typeof value === "number") {
+      value = Math.round(value);
+    }
+
+    if (type === "circle") {
+      let prefix = " m";
+      let prefixSq = " m²";
+      if (value >= 1E3) {
+        prefix = " km";
+        value = value / 1E3;
+      }
+      label = (
+        "R = " + value + prefix +
+        " \nA = " + (Math.round((value * value * Math.PI) * 1E3) / 1E3) + prefixSq
+      );
+    }
+
+    if (type === "area") {
+      let prefix = " m²";
+      if (value >= 1E6) {
+        prefix = " km²";
+        value = Math.round((value / 1E6) * 1E3) / 1E3;
+      }
+      label = value + prefix;
+    }
+
+    if (type === "length") {
+      let prefix = " m";
+      if (value >= 1E3) {
+        prefix = " km";
+        value = value / 1E3;
+      }
+      label = value + prefix;
+    }
+
+    return label;
   },
 
   /**
@@ -204,10 +339,12 @@ var DrawModel = {
   activateDrawTool: function (type) {
     var style = undefined
     ,   drawTool = undefined
-    ,   geometryType = undefined;
+    ,   geometryType = undefined
+    ,   olMap = this.get('olMap');
 
-    this.get('olMap').un('singleclick', this.removeSelected);
-    this.get('olMap').removeInteraction(this.get("drawTool"));
+    olMap.un('singleclick', this.removeSelected);
+    olMap.removeInteraction(this.get("drawTool"));
+    this.measureTooltip.setPosition(undefined);
 
     geometryType = type !== "Text" ? type : "Point";
 
@@ -217,13 +354,20 @@ var DrawModel = {
       type: geometryType
     });
 
+    olMap.on('pointermove', this.setPointerPosition.bind(this));
+
+    drawTool.on('drawstart', e => {
+      this.handleDrawStart(e, geometryType);
+    });
+
     drawTool.on('drawend', (event) => {
       this.handleDrawEnd(event.feature, type)
     });
 
     this.set('drawTool', drawTool);
-    this.get('olMap').addInteraction(this.get('drawTool'));
-    this.get('olMap').set('clickLock', true);
+    olMap.addInteraction(this.get('drawTool'));
+    olMap.set('clickLock', true);
+    this.set('drawToolActive', true);
   },
 
   /**
@@ -232,8 +376,10 @@ var DrawModel = {
    */
   abort: function () {
     this.get('olMap').un('singleclick', this.removeSelected);
+    this.get('olMap').un('pointermove', this.setPointerPosition);
     this.get('olMap').removeInteraction(this.get('drawTool'));
     this.get('olMap').set('clickLock', false);
+    this.set('drawToolActive', false);
   },
 
   /**
@@ -465,13 +611,16 @@ var DrawModel = {
           doc += '<styleUrl>#' + i + '</styleUrl>';
 
           if (feature.getGeometry() instanceof ol.geom.Point) {
-              doc += point(parser.writeFeature(feature));
+            doc += point(parser.writeFeature(feature));
           }
           if (feature.getGeometry() instanceof ol.geom.LineString) {
-              doc += line(parser.writeFeature(feature));
+            doc += line(parser.writeFeature(feature));
           }
           if (feature.getGeometry() instanceof ol.geom.Polygon) {
-              doc += polygon(parser.writeFeature(feature));
+            doc += polygon(parser.writeFeature(feature));
+          }
+          if (feature.getGeometry() instanceof ol.geom.Circle) {
+            doc += polygon(parser.writeFeature(feature));
           }
 
           if (feature.getProperties().style) {
@@ -530,7 +679,10 @@ var DrawModel = {
 
     var features = this.get('drawLayer').getSource().getFeatures()
     ,   transformed = []
-    ,   xml;
+    ,   xml
+    ,   form = document.createElement('form')
+    ,   input = document.createElement('input')
+    ,   curr = document.getElementById(this.exportHitsFormId);
 
     if (features.length === 0) {
       this.set({
@@ -541,6 +693,10 @@ var DrawModel = {
 
     features.forEach((feature) => {
       var c = feature.clone();
+      if (c.getGeometry() instanceof ol.geom.Circle) {
+        let geom = ol.geom.Polygon.fromCircle(feature.getGeometry(), 96);
+        c.setGeometry(geom);
+      }
       c.getGeometry().transform(this.get('olMap').getView().getProjection(), "EPSG:4326");
       c.setProperties({
         style: JSON.stringify(this.extractStyle(c.getStyle()[1]))
@@ -550,11 +706,20 @@ var DrawModel = {
 
     xml = this.writeKml(transformed, "ritobjekt");
 
-    $.post(this.get('exportUrl'), xml, (rsp) => {
-      this.set({
-        'kmlExportUrl': rsp
-      });
-    });
+    form.id = this.exportHitsFormId;
+    form.method = "post";
+    form.action = this.get('exportUrl');
+    input.value = xml;
+    input.name  = "json";
+    input.type  = "hidden";
+    form.appendChild(input);
+
+    if (curr)
+      document.body.replaceChild(form, curr);
+    else
+      document.body.appendChild(form);
+
+    form.submit();
   },
 
   /**
@@ -582,30 +747,58 @@ var DrawModel = {
   },
 
   /**
+   * Calculate extent of given features
+   * @instance
+   * @param {array} features
+   * @return {external:ol.Extent} extent
+   */
+  calculateExtent(features) {
+    var x = [];
+    features.forEach((feature, i) => {
+      var e = feature.getGeometry().getExtent(); // l b r t
+      if (i === 0) {
+        x = e;
+      } else {
+        let t = 0;
+        for (;t < 4; t++) {
+          if (t < 2) {
+            if (x[t] > e[t]) {
+              x[t] = e[t];
+            }
+          } else {
+            if (x[t] < e[t]) {
+              x[t] = e[t];
+            }
+          }
+        }
+      }
+    });
+    return x.every(c => c) ? x : false;
+  },
+
+  /**
    * Import draw layer and add features to the map.
    * @instance
    * @param {XMLDocument} xmlDocument
    */
   importDrawLayer: function (xmlDoc) {
 
-    var kml_string = xmlDoc.documentElement.childNodes[0].data;
-
-    //Chrome stores data at index [1] of the array and explorer at [0]
-    if (!kml_string) {
-      try {
-          kml_string = xmlDoc.documentElement.childNodes[1].data;
-      } catch (e) {
-          console.error('Could not import features from kml. Check var xmlDoc in draw.js');
-      }
+    var kml_string = $(xmlDoc).find('kml')[0].outerHTML;
+    if (typeof kml_string === "string") {
+      kml_string = kml_string.replace('<script/>', '');
     }
 
     var parser = new ol.format.KML()
-    ,   features = parser.readFeatures(kml_string);
+    ,   features = parser.readFeatures(kml_string)
+    ,   extent = false;
 
     features.forEach((feature) => {
       coordinates = feature.getGeometry().getCoordinates();
       type = feature.getGeometry().getType()
       newCoordinates = [];
+      feature.setProperties({
+        user: true
+      });
       if (type == 'LineString') {
         coordinates.forEach((c, i) => {
           pairs = [];
@@ -630,6 +823,7 @@ var DrawModel = {
         });
         feature.getGeometry().setCoordinates(newCoordinates);
       }
+
       feature.getGeometry().transform(
         "EPSG:4326",
         this.get('olMap').getView().getProjection()
@@ -638,6 +832,13 @@ var DrawModel = {
     });
 
     this.get('drawLayer').getSource().addFeatures(features);
+    extent = this.calculateExtent(features);
+
+    if (extent) {
+      let size = this.get('olMap').getSize();
+      this.get('olMap').getView().fit(extent, size);
+    }
+
   },
 
   /**
@@ -721,11 +922,13 @@ var DrawModel = {
 
     function getImage() {
 
+      var iconSrc = forcedProperties ? (forcedProperties.image || this.get('markerImg')) : this.get('markerImg');
+
       var icon = new ol.style.Icon({
         anchor: [0.5, 32],
         anchorXUnits: 'fraction',
         anchorYUnits: 'pixels',
-        src: forcedProperties ? forcedProperties.image : this.get('markerImg'),
+        src: iconSrc,
         imgSize: [32, 32]
       });
 
@@ -818,9 +1021,10 @@ var DrawModel = {
     ,   type  = feature.getProperties().type;
 
     switch (type) {
-      case "Point": return show ? "Nord: " + props.position.n + " Öst: " + props.position.e : "";
-      case "LineString": return show ? props.length + " m" : "";
-      case "Polygon": return show ? props.area + " m²" : "";
+      case "Point": return show ? this.formatLabel("point", [props.position.n, props.position.e]) : "";
+      case "LineString": return show ? this.formatLabel("length", props.length): "";
+      case "Polygon": return show ? this.formatLabel("area", props.area) : "";
+      case "Circle": return show ? this.formatLabel("circle", props.radius): "";
       case "Text": return props.description;
       default: return "";
     }
@@ -837,7 +1041,7 @@ var DrawModel = {
     this.get('source').changed();
 
     source.forEachFeature(feature => {
-      if (feature.getProperties().type !== "Text") {
+      if (feature.getProperties().type !== "Text" && feature.getStyle()) {
         let style = feature.getStyle();
         if (this.get('showLabels')) {
           style[1].getText().setText(this.getLabelText(feature));
@@ -875,6 +1079,7 @@ var DrawModel = {
     var geom
     ,   type = ""
     ,   lenght = 0
+    ,   radius = 0
     ,   area = 0
     ,   position = {
           n: 0,
@@ -896,6 +1101,9 @@ var DrawModel = {
       case "Polygon":
         area = Math.round(geom.getArea());
         break;
+      case "Circle":
+        radius = Math.round(geom.getRadius());
+        break;
       default:
         break;
     }
@@ -904,6 +1112,7 @@ var DrawModel = {
       user: true,
       length: length,
       area: area,
+      radius: radius,
       position: position
     });
   },
@@ -921,6 +1130,16 @@ var DrawModel = {
    */
   clicked: function () {
     this.set('visible', true);
+    this.set('toggled', !this.get('toggled'));
+  },
+
+  /**
+   * Set the property pointColor
+   * @param {string} color
+   * @instance
+   */
+  setCircleRadius: function (radius) {
+    this.set("circleRadius", radius);
   },
 
   /**
@@ -1031,6 +1250,15 @@ var DrawModel = {
     this.set('pointText', text);
     this.setFeaturePropertiesFromText(feature, text || "");
     feature.setStyle(this.getStyle(feature));
+  },
+
+  /**
+   * Set pointer position
+   * @param {object} event
+   * @instance
+   */
+  setPointerPosition: function(e) {
+    this.set('pointerPosition', e);
   }
 };
 
